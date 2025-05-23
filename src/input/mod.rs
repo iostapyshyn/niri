@@ -2294,7 +2294,12 @@ impl State {
 
         if ButtonState::Pressed == button_state {
             let mods = self.niri.seat.get_keyboard().unwrap().modifier_state();
-            let modifiers = modifiers_from_state(mods);
+            let mut modifiers = modifiers_from_state(mods);
+
+            let is_overview_open = self.niri.layout.is_overview_open();
+            if is_overview_open {
+                modifiers |= mod_key.to_modifiers();
+            }
 
             if self.niri.mods_with_mouse_binds.contains(&modifiers) {
                 if let Some(bind) = match button {
@@ -2320,7 +2325,6 @@ impl State {
             self.niri.pointer_visibility = PointerVisibility::Visible;
             self.niri.tablet_cursor_location = None;
 
-            let is_overview_open = self.niri.layout.is_overview_open();
 
             if is_overview_open && !pointer.is_grabbed() && button == Some(MouseButton::Right) {
                 if let Some((output, ws)) = self.niri.workspace_under_cursor(true) {
